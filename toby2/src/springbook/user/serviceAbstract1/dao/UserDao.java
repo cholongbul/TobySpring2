@@ -2,7 +2,6 @@ package springbook.user.serviceAbstract1.dao;
 
 import java.util.List;
 
-import springbook.user.domain.User;
 import springbook.user.domain.User2;
 //UserDao인터페이스
 public interface UserDao {
