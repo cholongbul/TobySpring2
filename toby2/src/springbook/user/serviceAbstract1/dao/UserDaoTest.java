@@ -29,9 +29,9 @@ public class UserDaoTest {
 	
 	@Before //JUnit이 제공하는 애노테이션, @Test 메소드가 실행되기 전에 먼저 실행돼야 하는 메소드를 정의한다.
 	public void setUp() {
-		this.user1 = new User2("cho1", "초롱불1", "greenligh1", Level.BASIC, 1, 0);
-		this.user2 = new User2("cho2", "초롱불2", "greenligh2", Level.SILVER, 55, 10);
-		this.user3 = new User2("cho3", "초롱불3", "greenligh3", Level.GOLD, 100, 40);
+		this.user1 = new User2("cho1", "초롱불1", "greenligh1", Level.BASIC, 1, 0, "abc@naver.com");
+		this.user2 = new User2("cho2", "초롱불2", "greenligh2", Level.SILVER, 55, 10, "abc3@naver.com");
+		this.user3 = new User2("cho3", "초롱불3", "greenligh3", Level.GOLD, 100, 40, "abc2@naver.com");
 	}
 
 	 //Junit에게 테스트 메소드임을 알려줌

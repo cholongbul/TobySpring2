@@ -40,8 +40,8 @@ public class UserDaoJdbc implements UserDao {
 
 	public void add(final User2 user) {// 클라이언트 final변수
 
-		this.jdbcTemplate.update("insert into users(id, name, password, level, login, recommend) values(?,?,?,?,?,?)", user.getId(), user.getName(),
-				user.getPassword(), user.getLevel().intValue(), user.getLogin(), user.getRecommend());
+		this.jdbcTemplate.update("insert into users(id, name, password, level, login, recommend, email) values(?,?,?,?,?,?,?)", user.getId(), user.getName(),
+				user.getPassword(), user.getLevel().intValue(), user.getLogin(), user.getRecommend(), user.getEmail());
 		// 내장 콜백 활용
 	}
 
@@ -68,7 +68,7 @@ public class UserDaoJdbc implements UserDao {
 	@Override
 	public void update(User2 user) {
 		this.jdbcTemplate.update("update users set name = ?, password = ?, level = ?, login = ?," +
-				"recommend = ? where id = ? ", user.getName(), user.getPassword(), user.getLevel().intValue(), user.getLogin(), user.getRecommend(), user.getId());
+				"recommend = ?, email = ? where id = ? ", user.getName(), user.getPassword(), user.getLevel().intValue(), user.getLogin(), user.getRecommend(), user.getEmail(), user.getId());
 		
 	}
 
