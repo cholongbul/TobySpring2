@@ -1,4 +1,4 @@
-package springbook.user.serviceAbstract1.dao;
+package springbook.user.AOP.dao;
 
 
 import java.sql.ResultSet;
@@ -12,7 +12,6 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 
 import springbook.user.domain.Level;
-import springbook.user.domain.User;
 import springbook.user.domain.User2;
 
 //스프링의 JdbcTemplate
