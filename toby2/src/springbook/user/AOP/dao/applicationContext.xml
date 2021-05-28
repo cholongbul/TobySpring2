@@ -17,19 +17,19 @@
 
 
 	<bean id="userService"
-		class="springbook.user.serviceAbstract1.service.UserServiceTx">
+		class="springbook.user.AOP.service.UserServiceTx">
 		<property name="transactionManager" ref="transactionManager" />
 		<property name="userService" ref="userServiceImpl" />
 	</bean>
 	
-	<bean id="userServiceImpl" class="springbook.user.service.UserserviceImpl">
+	<bean id="userServiceImpl" class="springbook.user.AOP.service.UserServiceImpl">
 		<property name="userDao" ref="userDao"/>
 		<property name="mailSender" ref="mailSender" />
 	</bean>
 
 
 	<bean id="userDao"
-		class="springbook.user.serviceAbstract1.dao.UserDaoJdbc">
+		class="springbook.user.AOP.dao.UserDaoJdbc">
 		<property name="dataSource" ref="dataSource" />
 	</bean>
 
@@ -38,6 +38,6 @@
 		<property name="dataSource" ref="dataSource" />
 	</bean>
 	<bean id="mailSender"
-		class="springbook.user.serviceAbstract1.service.DummyMailSender" />
+		class="springbook.user.AOP.service.DummyMailSender" />
 
 </beans>
