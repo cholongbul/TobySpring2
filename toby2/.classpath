@@ -21,5 +21,6 @@
 	<classpathentry kind="lib" path="toby_lib/activation-1.1.jar"/>
 	<classpathentry kind="lib" path="toby_lib/mail-1.4.jar"/>
 	<classpathentry kind="lib" path="toby_lib/spring-context-support-3.0.7.RELEASE.jar"/>
+	<classpathentry kind="lib" path="toby_lib/mockito-all-1.10.19.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
