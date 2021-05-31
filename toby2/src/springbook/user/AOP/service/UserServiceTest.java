@@ -9,6 +9,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.lang.reflect.Proxy;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -135,10 +136,14 @@ public class UserServiceTest {
 		UserServiceImpl testUserService = new TestUserService(users.get(3).getId());
 		testUserService.setUserDao(userDao);
 		testUserService.setMailSender(mailSender);
-
-		UserServiceTx txUserService = new UserServiceTx();
-		txUserService.setTransactionManager(transactionManager);
-		txUserService.setUserService(testUserService);
+		
+		TransactionHandler txHandler = new TransactionHandler();
+		txHandler.setTarget(testUserService);
+		txHandler.setTransactionManager(transactionManager);
+		txHandler.setPattern("upgradeLevels");
+		UserService txUserService = 
+				(UserService)Proxy.newProxyInstance(getClass().getClassLoader(), 
+						new Class[] {UserService.class}, txHandler);
 
 		userDao.deleteAll();
 		for (User2 user : users) userDao.add(user);
@@ -148,7 +153,6 @@ public class UserServiceTest {
 			fail("TestUserServiceException expected");
 		} catch (TestUserServiceException e) {
 		}
-		checkLevelUpgraded(users.get(1), false);
 	}
 	
 	//Mockito를 적용한 테스트 코드
