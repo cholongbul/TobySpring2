@@ -9,7 +9,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.lang.reflect.Proxy;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -18,11 +17,11 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
-import org.mockito.internal.matchers.Any;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.mail.MailMessage;
+import org.springframework.context.ApplicationContext;
 import org.springframework.mail.MailSender;
 import org.springframework.mail.SimpleMailMessage;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -30,13 +29,15 @@ import org.springframework.transaction.PlatformTransactionManager;
 import static springbook.user.AOP.service.UserServiceImpl.MIN_LOGCOUNT_FOR_SILVER;
 import static springbook.user.AOP.service.UserServiceImpl.MIN_RECCOMEND_FOR_GOLD;
 import springbook.user.domain.Level;
-import springbook.user.domain.User;
 import springbook.user.domain.User2;
 import springbook.user.AOP.dao.UserDao;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations = "/springbook/user/AOP/dao/applicationContext.xml")
 public class UserServiceTest {
+	
+	@Autowired
+	ApplicationContext context;
 
 	@Autowired
 	UserService userService;
@@ -132,18 +133,16 @@ public class UserServiceTest {
 	}
 
 	@Test
+	@DirtiesContext
 	public void upgradeAllorNothing() throws Exception {
-		UserServiceImpl testUserService = new TestUserService(users.get(3).getId());
+		TestUserService testUserService = new TestUserService(users.get(3).getId());
 		testUserService.setUserDao(userDao);
 		testUserService.setMailSender(mailSender);
 		
-		TransactionHandler txHandler = new TransactionHandler();
-		txHandler.setTarget(testUserService);
-		txHandler.setTransactionManager(transactionManager);
-		txHandler.setPattern("upgradeLevels");
+		TxProxyFactoryBean txProxyFactoryBean = context.getBean("&userService", TxProxyFactoryBean.class); //테스트용 타깃 주입
+		txProxyFactoryBean.setTarget(testUserService);
 		UserService txUserService = 
-				(UserService)Proxy.newProxyInstance(getClass().getClassLoader(), 
-						new Class[] {UserService.class}, txHandler);
+				(UserService) txProxyFactoryBean.getObject();
 
 		userDao.deleteAll();
 		for (User2 user : users) userDao.add(user);
@@ -153,6 +152,7 @@ public class UserServiceTest {
 			fail("TestUserServiceException expected");
 		} catch (TestUserServiceException e) {
 		}
+		checkLevelUpgraded(users.get(1), false);
 	}
 	
 	//Mockito를 적용한 테스트 코드
