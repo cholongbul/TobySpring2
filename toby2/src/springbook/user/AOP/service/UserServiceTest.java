@@ -36,15 +36,14 @@ import springbook.user.AOP.dao.UserDao;
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations = "/springbook/user/AOP/dao/applicationContext.xml")
 public class UserServiceTest {
-	
+
 	@Autowired
 	ApplicationContext context;
-
 	@Autowired
 	UserService userService;
-
 	@Autowired
-	UserServiceImpl userServiceImpl;
+	UserService testUserService;
+
 
 	@Autowired
 	UserDao userDao;
@@ -60,7 +59,9 @@ public class UserServiceTest {
 	@Before
 	public void setup() {
 		users = Arrays.asList(
-				new User2("bumjin", "박범진", "p1", Level.BASIC, MIN_LOGCOUNT_FOR_SILVER - 1, 0, "ab1c@naver.com"), // 경계값																	// 활용
+				new User2("bumjin", "박범진", "p1", Level.BASIC, MIN_LOGCOUNT_FOR_SILVER - 1, 0, "ab1c@naver.com"), // 경계값
+																													// //
+																													// 활용
 				new User2("joythouch", "강명성", "p2", Level.BASIC, MIN_LOGCOUNT_FOR_SILVER, 0, "abc2@naver.com"),
 				new User2("erwins", "신승한", "p3", Level.SILVER, 60, MIN_RECCOMEND_FOR_GOLD - 1, "abc3@naver.com"),
 				new User2("madnite1", "이상호", "p4", Level.SILVER, 60, MIN_RECCOMEND_FOR_GOLD, "abc4@naver.com"),
@@ -73,16 +74,16 @@ public class UserServiceTest {
 	@Test
 	public void upgradeLevels() throws Exception {
 		UserServiceImpl userServiceImpl = new UserServiceImpl();
-		
+
 		MockUserDao mockUserDao = new MockUserDao(this.users);
 		userServiceImpl.setUserDao(mockUserDao);
-		
+
 		MockMailSender mockMailSender = new MockMailSender();
 		userServiceImpl.setMailSender(mockMailSender);
 
 		userServiceImpl.upgradeLevels();
-		
-		List<User2> updated = mockUserDao.getUpdated(); //MockUserDao로부터 업데이트 결과를 가져옴
+
+		List<User2> updated = mockUserDao.getUpdated(); // MockUserDao로부터 업데이트 결과를 가져옴
 		assertThat(updated.size(), is(2));
 		checkUserAndLevel(updated.get(0), "joythouch", Level.SILVER);
 		checkUserAndLevel(updated.get(1), "madnite1", Level.GOLD);
@@ -127,56 +128,53 @@ public class UserServiceTest {
 		}
 
 	}
-	
+
 	private void checkUserAndLevel(User2 updated, String expectedId, Level expectedLevel) {
 		assertThat(updated.getId(), is(expectedId));
 		assertThat(updated.getLevel(), is(expectedLevel));
 	}
 
 	@Test
-	@DirtiesContext
 	public void upgradeAllorNothing() throws Exception {
-		TestUserService testUserService = new TestUserService(users.get(3).getId());
-		testUserService.setUserDao(userDao);
-		testUserService.setMailSender(mailSender);
-		
-		ProxyFactoryBean txProxyFactoryBean = context.getBean("&userService", ProxyFactoryBean.class); //테스트용 타깃 주입
-		txProxyFactoryBean.setTarget(testUserService);
-		UserService txUserService = 
-				(UserService) txProxyFactoryBean.getObject();
 
 		userDao.deleteAll();
-		for (User2 user : users) userDao.add(user);
+		for (User2 user : users)
+			userDao.add(user);
 
 		try {
-			txUserService.upgradeLevels();
+			this.testUserService.upgradeLevels();
 			fail("TestUserServiceException expected");
 		} catch (TestUserServiceException e) {
 		}
 		checkLevelUpgraded(users.get(1), false);
 	}
 	
-	//Mockito를 적용한 테스트 코드
+	@Test //자동생성된 프록시 확인
+	public void advisorAutoProxyCreator() {
+		assertThat(testUserService, is(java.lang.reflect.Proxy.class));
+	}
+
+	// Mockito를 적용한 테스트 코드
 	@Test
 	public void mockUpgradeLevels() throws Exception {
 		UserServiceImpl userServiceImpl = new UserServiceImpl();
-		
+
 		UserDao mockUserDao = mock(UserDao.class);
 		when(mockUserDao.getAll()).thenReturn(this.users);
 		userServiceImpl.setUserDao(mockUserDao);
-		
+
 		MailSender mockMailSender = mock(MailSender.class);
 		userServiceImpl.setMailSender(mockMailSender);
-		
+
 		userServiceImpl.upgradeLevels();
-	
+
 		verify(mockUserDao, times(2)).update(any(User2.class));
 		verify(mockUserDao, times(2)).update(any(User2.class));
 		verify(mockUserDao).update(users.get(1));
 		assertThat(users.get(1).getLevel(), is(Level.SILVER));
 		verify(mockUserDao).update(users.get(3));
 		assertThat(users.get(3).getLevel(), is(Level.GOLD));
-		
+
 		ArgumentCaptor<SimpleMailMessage> mailMessageArg = ArgumentCaptor.forClass(SimpleMailMessage.class);
 		verify(mockMailSender, times(2)).send(mailMessageArg.capture());
 		List<SimpleMailMessage> mailMessages = mailMessageArg.getAllValues();
@@ -185,13 +183,8 @@ public class UserServiceTest {
 	}
 
 	// 스태틱 내부 클래스
-	static class TestUserService extends UserServiceImpl {
-		private String id;
-
-		private TestUserService(String id) {
-			this.id = id;
-
-		}
+	static class TestUserServiceImpl extends UserServiceImpl {
+		private String id = "madnite1";
 
 		@Override
 		protected void upgradeLevel(User2 user) {
@@ -218,19 +211,17 @@ public class UserServiceTest {
 		public List<User2> getUpdated() {
 			return this.updated;
 		}
-		
+
 		@Override
 		public List<User2> getAll() {
 			return this.users; // 스텁 기능 제공
 		}
-		
+
 		@Override
 		public void update(User2 user) {
 			updated.add(user);
 
-		}//목 오브젝트 기능 제공
-
-
+		}// 목 오브젝트 기능 제공
 
 		@Override
 		public void add(User2 user) {
@@ -244,7 +235,6 @@ public class UserServiceTest {
 
 		}
 
-		
 		@Override
 		public void deleteAll() {
 			throw new UnsupportedOperationException();
@@ -257,7 +247,6 @@ public class UserServiceTest {
 
 		}
 
-		
 	}
 
 }
