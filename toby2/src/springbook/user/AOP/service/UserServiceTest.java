@@ -20,6 +20,7 @@ import org.mockito.ArgumentCaptor;
 import org.springframework.aop.framework.ProxyFactoryBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
+import org.springframework.dao.TransientDataAccessResourceException;
 import org.springframework.mail.MailSender;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.test.annotation.DirtiesContext;
@@ -181,18 +182,24 @@ public class UserServiceTest {
 		assertThat(mailMessages.get(0).getTo()[0], is(users.get(1).getEmail()));
 		assertThat(mailMessages.get(1).getTo()[0], is(users.get(3).getEmail()));
 	}
+	
+	@Test(expected = TransientDataAccessResourceException.class)
+	public void readOnlyTransactionAttribute() {
+		testUserService.getAll();
+	}
 
 	// 스태틱 내부 클래스
 	static class TestUserServiceImpl extends UserServiceImpl {
 		private String id = "madnite1";
 
 		@Override
-		protected void upgradeLevel(User2 user) {
-			if (user.getId().equals(this.id))
-				throw new TestUserServiceException();
-			super.upgradeLevel(user);
+		public List<User2> getAll() {
+			for(User2 user : super.getAll()) {
+				super.update(user);
+			}
+			return null;
+			
 		}
-
 	}
 
 	// 스태틱 내부 클래스

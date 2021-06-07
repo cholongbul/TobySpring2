@@ -76,4 +76,25 @@ public class UserServiceImpl implements UserService {
 		userDao.add(user);
 	}
 
+	@Override
+	public List<User2> getAll() {
+		return userDao.getAll();
+	}
+
+	@Override
+	public void deleteAll() {
+		userDao.deleteAll();
+		
+	}
+
+	@Override
+	public void update(User2 user) {
+		userDao.update(user);
+	}
+
+	@Override
+	public User2 get(String id) {
+		return userDao.get(id);
+	}
+
 }
