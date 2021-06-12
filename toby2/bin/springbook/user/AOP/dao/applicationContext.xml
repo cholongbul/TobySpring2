@@ -30,6 +30,13 @@ http://www.springframework.org/schema/beans/spring-beans.xsd
 
 	<bean id="userDao" class="springbook.user.AOP.dao.UserDaoJdbc">
 		<property name="dataSource" ref="dataSource" />
+		<property name="sqlAdd" value="insert into users(id, name, password, level, login, recommend, email) values(?,?,?,?,?,?,?)" />
+			<property name="sqlGet" ref="select * from users where id = ?" />
+			<property name="sqlGetAll" ref="select * from users order by id" />
+			<property name="sqlDeleteAll" ref="delete from users" />
+			<property name="sqlGetCount" ref="select count(*) from users" />
+			<property name="sqlUpdate" ref="update users set name = ?, password = ?, level = ?, login = ?, recommend = ?, email = ? where id = ?" />
+	
 	</bean>
 
 	
