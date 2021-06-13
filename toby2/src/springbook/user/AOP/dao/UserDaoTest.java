@@ -16,7 +16,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import springbook.user.domain.Level;
 import springbook.user.domain.User2;
 @RunWith(SpringJUnit4ClassRunner.class)//스프링-테스트 프레임워크의 JUnit 확장기능 지정
-@ContextConfiguration(locations="/springbook/user/serviceAbstract1/dao/applicationContext.xml")
+@ContextConfiguration(locations="/springbook/user/AOP/dao/applicationContext.xml")
 public class UserDaoTest {
 	
 
